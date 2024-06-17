@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Website Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            flex: 1;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #4caf50;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        .result {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .result h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .result p {
+            margin: 0;
+            margin-bottom: 5px;
+        }
+        .features {
+            margin-left: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        .features li {
+            margin-bottom: 5px;
+        }
+        /* Styles for phishing prediction */
+        .phishing-prediction {
+            color: #fff;
+            background-color: #ff5252; /* Red */
+        }
+        /* Styles for legitimate prediction */
+        .legitimate-prediction {
+            color: #333;
+            background-color: #4caf50; /* Green */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Website Detection</h1>
+        <form id="predictionForm" method="post">
+            <label for="urlInput">Enter URL:</label>
+            <input type="text" id="urlInput" name="urlInput" required>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="predictionResult" class="result" style="display: none;">
+            <h2>Prediction Result</h2>
+            <p id="urlOutput"></p>
+            <p id="predictionOutput"></p>
+            <p>Features:</p>
+            <ul id="featuresOutput" class="features"></ul>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('predictionForm');
+        const resultDiv = document.getElementById('predictionResult');
+        const urlOutput = document.getElementById('urlOutput');
+        const predictionOutput = document.getElementById('predictionOutput');
+        const featuresOutput = document.getElementById('featuresOutput');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const urlInput = document.getElementById('urlInput').value;
+
+            try {
+                const response = await fetch('/predict_with_features', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ urls: [urlInput] })
+                });
+
+                const data = await response.json();
+
+                if (data.length > 0) {
+                    const prediction = data[0];
+                    urlOutput.textContent = `URL: ${prediction.url}`;
+                    predictionOutput.textContent = `Prediction: ${prediction.phishing ? 'Phishing' : 'Legitimate'}`;
+                    featuresOutput.innerHTML = '';
+                    for (const [key, value] of Object.entries(prediction.features)) {
+                        const li = document.createElement('li');
+                        li.textContent = `${key}: ${value}`;
+                        featuresOutput.appendChild(li);
+                    }
+                    resultDiv.style.display = 'block';
+
+                    // Apply styles based on prediction result
+                    resultDiv.classList.remove('phishing-prediction', 'legitimate-prediction');
+                    if (prediction.phishing) {
+                        resultDiv.classList.add('phishing-prediction');
+                    } else {
+                        resultDiv.classList.add('legitimate-prediction');
+                    }
+                } else {
+                    alert('No prediction data received.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while processing the prediction.');
+            }
+        });
+    </script>
+</body>
+</html>
