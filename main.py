@@ -30,7 +30,6 @@ def predict_with_features():
     urls = data['urls']
 
     # Load model
-    model = load_model('model.h5')
 
     predictions = []
     for url in urls:
@@ -38,10 +37,11 @@ def predict_with_features():
         start_feature_extraction = time.time()
         features = extract_features(url)
         end_feature_extraction = time.time()
-
+        print(features)
         # Measure time for model prediction
         start_prediction = time.time()
         ordered_features = [features[feature] for feature in features]
+        model = load_model('model.h5')
         prediction = predict_phishing(ordered_features, model)
         end_prediction = time.time()
 
