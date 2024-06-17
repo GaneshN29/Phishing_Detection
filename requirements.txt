@@ -1,5 +1,6 @@
 tensorflow==2.12.0
 tensorflow-estimator==2.12.0
+keras== 2.12.0
 Flask==3.0.0
 Flask-Cors==4.0.0
 Flask-Jsonpify==1.5.0
